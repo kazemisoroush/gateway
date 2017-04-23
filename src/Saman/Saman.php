@@ -3,9 +3,9 @@
 namespace Larabookir\Gateway\Saman;
 
 use Illuminate\Support\Facades\Input;
-use SoapClient;
 use Larabookir\Gateway\PortAbstract;
 use Larabookir\Gateway\PortInterface;
+use SoapClient;
 
 class Saman extends PortAbstract implements PortInterface
 {
@@ -41,24 +41,22 @@ class Saman extends PortAbstract implements PortInterface
      */
     public function redirect()
     {
-
-        return view('gateway::saman-redirector')->with([
-            'amount' => $this->amount,
-            'merchant' => $this->config->get('gateway.saman.merchant'),
-            'resNum' => $this->transactionId(),
-            'callBackUrl' => $this->getCallback()
-        ]);
+        return view('gateway::saman-redirector')->with(
+            $this->redirectParameters()
+        );
     }
-    
+
     /**
-     * {@inheritdoc}
+     * Parameters to pass to the gateway.
+     *
+     * @return array
      */
     public function redirectParameters()
     {
         return [
-            'amount' => $this->amount,
-            'merchant' => $this->config->get('gateway.saman.merchant'),
-            'resNum' => $this->transactionId(),
+            'amount'      => $this->amount,
+            'merchant'    => $this->config->get('gateway.saman.merchant'),
+            'resNum'      => $this->transactionId(),
             'callBackUrl' => $this->getCallback()
         ];
     }
