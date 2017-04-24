@@ -1,9 +1,8 @@
 <?php
 namespace Larabookir\Gateway;
 
-use Illuminate\Support\Facades\Request;
-use Larabookir\Gateway\Enum;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Request;
 
 abstract class PortAbstract
 {
@@ -66,13 +65,13 @@ abstract class PortAbstract
 	 */
 	protected $trackingCode;
 
-	/**
-	 * Initialize of class
-	 *
-	 * @param Config $config
-	 * @param DataBaseManager $db
-	 * @param int $port
-	 */
+    /**
+     * Initialize of class
+     *
+     * @internal param \Larabookir\Gateway\Config $config
+     * @internal param \Larabookir\Gateway\DataBaseManager $db
+     * @internal param int $port
+     */
 	function __construct()
 	{
 		$this->db = app('db');
@@ -265,12 +264,14 @@ abstract class PortAbstract
 
 	}
 
-	/**
-	 * New log
-	 *
-	 * @param string|int $statusCode
-	 * @param string $statusMessage
-	 */
+    /**
+     * New log
+     *
+     * @param string|int $statusCode
+     * @param string     $statusMessage
+     *
+     * @return mixed
+     */
 	protected function newLog($statusCode, $statusMessage)
 	{
 		return $this->getLogTable()->insert([
