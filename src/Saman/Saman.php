@@ -17,7 +17,9 @@ class Saman extends PortAbstract implements PortInterface
     protected $serverUrl = 'https://sep.shaparak.ir/payments/referencepayment.asmx?wsdl';
 
     /**
-     * {@inheritdoc}
+     * @param int $amount
+     *
+     * @return $this
      */
     public function set($amount)
     {
@@ -27,7 +29,7 @@ class Saman extends PortAbstract implements PortInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @return $this
      */
     public function ready()
     {
@@ -37,7 +39,7 @@ class Saman extends PortAbstract implements PortInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @return mixed
      */
     public function redirect()
     {
@@ -62,7 +64,9 @@ class Saman extends PortAbstract implements PortInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @param object $transaction
+     *
+     * @return $this
      */
     public function verify($transaction)
     {
@@ -75,8 +79,11 @@ class Saman extends PortAbstract implements PortInterface
     }
 
     /**
-     * Sets callback url
+     * Set callback url.
+     *
      * @param $url
+     *
+     * @return $this|string
      */
     function setCallback($url)
     {
@@ -85,7 +92,8 @@ class Saman extends PortAbstract implements PortInterface
     }
 
     /**
-     * Gets callback url
+     * Gets callback url.
+     *
      * @return string
      */
     function getCallback()
@@ -122,14 +130,13 @@ class Saman extends PortAbstract implements PortInterface
         throw new SamanException($payRequestRes);
     }
 
-
     /**
-     * Verify user payment from bank server
+     * Verify user payment from bank server.
      *
      * @return bool
      *
-     * @throws SamanException
-     * @throws SoapFault
+     * @throws \Larabookir\Gateway\Saman\SamanException
+     * @throws \SoapFault
      */
     protected function verifyPayment()
     {
@@ -139,11 +146,9 @@ class Saman extends PortAbstract implements PortInterface
             "password" => $this->config->get('gateway.saman.password'),
         );
 
-
         try {
             $soap = new SoapClient($this->serverUrl);
             $response = $soap->VerifyTransaction($fields["RefNum"], $fields["merchantID"]);
-
         } catch (\SoapFault $e) {
             $this->transactionFailed();
             $this->newLog('SoapFault', $e->getMessage());
