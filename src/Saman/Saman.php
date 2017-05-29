@@ -49,21 +49,6 @@ class Saman extends PortAbstract implements PortInterface
     }
 
     /**
-     * Parameters to pass to the gateway.
-     *
-     * @return array
-     */
-    public function redirectParameters()
-    {
-        return [
-            'amount'      => $this->amount,
-            'merchant'    => $this->config->get('gateway.saman.merchant'),
-            'resNum'      => $this->transactionId(),
-            'callBackUrl' => $this->getCallback()
-        ];
-    }
-
-    /**
      * @param object $transaction
      *
      * @return $this
@@ -106,7 +91,6 @@ class Saman extends PortAbstract implements PortInterface
         return $url;
     }
 
-
     /**
      * Check user payment
      *
@@ -129,6 +113,7 @@ class Saman extends PortAbstract implements PortInterface
         $this->newLog($payRequestResCode, @SamanException::$errors[$payRequestRes]);
         throw new SamanException($payRequestRes);
     }
+
 
     /**
      * Verify user payment from bank server.
@@ -184,5 +169,28 @@ class Saman extends PortAbstract implements PortInterface
         return true;
     }
 
+    /**
+     * Url which redirects to bank url.
+     *
+     * @return string
+     */
+    public function getGatewayUrl()
+    {
+        return 'https://sep.shaparak.ir/Payment.aspx';
+    }
 
+    /**
+     * Parameters to pass to the gateway.
+     *
+     * @return array
+     */
+    public function redirectParameters()
+    {
+        return [
+            'amount'      => $this->amount,
+            'merchant'    => $this->config->get('gateway.saman.merchant'),
+            'resNum'      => $this->transactionId(),
+            'callBackUrl' => $this->getCallback()
+        ];
+    }
 }

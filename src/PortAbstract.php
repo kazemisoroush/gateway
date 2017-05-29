@@ -336,4 +336,18 @@ abstract class PortAbstract {
             (! empty($url_array['host']) ? $url_array['host'] : null) .
             $url_array['path'] . '?' . http_build_query($query_array);
     }
+
+    /**
+     * Url which redirects to bank url.
+     *
+     * @return string
+     */
+    public abstract function getGatewayUrl();
+
+    /**
+     * Parameters to pass to the gateway.
+     *
+     * @return array
+     */
+    public abstract function redirectParameters();
 }

@@ -3,189 +3,215 @@
 namespace Larabookir\Gateway\Parsian;
 
 use Illuminate\Support\Facades\Input;
-use SoapClient;
 use Larabookir\Gateway\PortAbstract;
 use Larabookir\Gateway\PortInterface;
+use SoapClient;
 
-class Parsian extends PortAbstract implements PortInterface
-{
-	/**
-	 * Url of parsian gateway web service
-	 *
-	 * @var string
-	 */
-	protected $serverUrl = 'https://pec.shaparak.ir/pecpaymentgateway/eshopservice.asmx?wsdl';
+class Parsian extends PortAbstract implements PortInterface {
 
-	/**
-	 * Address of gate for redirect
-	 *
-	 * @var string
-	 */
-	protected $gateUrl = 'https://pec.shaparak.ir/pecpaymentgateway/default.aspx?au=';
+    /**
+     * Url of parsian gateway web service
+     *
+     * @var string
+     */
+    protected $serverUrl = 'https://pec.shaparak.ir/pecpaymentgateway/eshopservice.asmx?wsdl';
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function set($amount)
-	{
-		$this->amount = intval($amount);
-		return $this;
-	}
+    /**
+     * Address of gate for redirect
+     *
+     * @var string
+     */
+    protected $gateUrl = 'https://pec.shaparak.ir/pecpaymentgateway/default.aspx?au=';
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function ready()
-	{
-		$this->sendPayRequest();
+    /**
+     * {@inheritdoc}
+     */
+    public function set($amount)
+    {
+        $this->amount = intval($amount);
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function redirect()
-	{
-		$url = $this->gateUrl . $this->refId();
+    /**
+     * {@inheritdoc}
+     */
+    public function ready()
+    {
+        $this->sendPayRequest();
 
-		return view('gateway::parsian-redirector')->with(compact('url'));
-	}
+        return $this;
+    }
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function verify($transaction)
-	{
-		parent::verify($transaction);
+    /**
+     * {@inheritdoc}
+     */
+    public function redirect()
+    {
+        $url = $this->gateUrl . $this->refId();
 
-		$this->verifyPayment();
+        return view('gateway::parsian-redirector')->with(compact('url'));
+    }
 
-		return $this;
-	}
+    /**
+     * {@inheritdoc}
+     */
+    public function verify($transaction)
+    {
+        parent::verify($transaction);
 
-	/**
-	 * Sets callback url
-	 * @param $url
-	 */
-	function setCallback($url)
-	{
-		$this->callbackUrl = $url;
-		return $this;
-	}
+        $this->verifyPayment();
 
-	/**
-	 * Gets callback url
-	 * @return string
-	 */
-	function getCallback()
-	{
-		if (!$this->callbackUrl)
-			$this->callbackUrl = $this->config->get('gateway.parsian.callback-url');
+        return $this;
+    }
 
-		return $this->makeCallback($this->callbackUrl, ['transaction_id' => $this->transactionId()]);
-	}
+    /**
+     * Sets callback url
+     *
+     * @param $url
+     */
+    function setCallback($url)
+    {
+        $this->callbackUrl = $url;
 
-	/**
-	 * Send pay request to parsian gateway
-	 *
-	 * @return bool
-	 *
-	 * @throws ParsianErrorException
-	 */
-	protected function sendPayRequest()
-	{
-		$this->newTransaction();
+        return $this;
+    }
 
-		$params = array(
-			'pin' => $this->config->get('gateway.parsian.pin'),
-			'amount' => $this->amount,
-			'orderId' => $this->transactionId(),
-			'callbackUrl' => $this->getCallback(),
-			'authority' => 0,
-			'status' => 1
-		);
+    /**
+     * Gets callback url
+     * @return string
+     */
+    function getCallback()
+    {
+        if( ! $this->callbackUrl)
+            $this->callbackUrl = $this->config->get('gateway.parsian.callback-url');
 
-		try {
-			$soap = new SoapClient($this->serverUrl);
-			$response = $soap->PinPaymentRequest($params);
+        return $this->makeCallback($this->callbackUrl, ['transaction_id' => $this->transactionId()]);
+    }
 
-		} catch (\SoapFault $e) {
-			$this->transactionFailed();
-			$this->newLog('SoapFault', $e->getMessage());
-			throw $e;
-		}
+    /**
+     * Send pay request to parsian gateway
+     *
+     * @return bool
+     *
+     * @throws ParsianErrorException
+     */
+    protected function sendPayRequest()
+    {
+        $this->newTransaction();
 
-		if ($response !== false) {
-			$authority = $response->authority;
-			$status = $response->status;
+        $params = [
+            'pin'         => $this->config->get('gateway.parsian.pin'),
+            'amount'      => $this->amount,
+            'orderId'     => $this->transactionId(),
+            'callbackUrl' => $this->getCallback(),
+            'authority'   => 0,
+            'status'      => 1
+        ];
 
-			if ($authority && $status == 0) {
-				$this->refId = $authority;
-				$this->transactionSetRefId();
-				return true;
-			}
+        try {
+            $soap = new SoapClient($this->serverUrl);
+            $response = $soap->PinPaymentRequest($params);
 
-			$errorMessage = ParsianResult::errorMessage($status);
-			$this->transactionFailed();
-			$this->newLog($status, $errorMessage);
-			throw new ParsianErrorException($errorMessage, $status);
+        } catch(\SoapFault $e) {
+            $this->transactionFailed();
+            $this->newLog('SoapFault', $e->getMessage());
+            throw $e;
+        }
 
-		} else {
-			$this->transactionFailed();
-			$this->newLog(-1, 'خطا در اتصال به درگاه پارسیان');
-			throw new ParsianErrorException('خطا در اتصال به درگاه پارسیان', -1);
-		}
-	}
+        if($response !== false) {
+            $authority = $response->authority;
+            $status = $response->status;
 
-	/**
-	 * Verify payment
-	 *
-	 * @throws ParsianErrorException
-	 */
-	protected function verifyPayment()
-	{
-		if (!Input::has('au') && !Input::has('rs'))
-			throw new ParsianErrorException('درخواست غیر معتبر', -1);
+            if($authority && $status == 0) {
+                $this->refId = $authority;
+                $this->transactionSetRefId();
 
-		$authority = Input::get('au');
-		$status = Input::get('rs');
+                return true;
+            }
 
-		if ($status != 0) {
-			$errorMessage = ParsianResult::errorMessage($status);
-			$this->newLog($status, $errorMessage);
-			throw new ParsianErrorException($errorMessage, $status);
-		}
+            $errorMessage = ParsianResult::errorMessage($status);
+            $this->transactionFailed();
+            $this->newLog($status, $errorMessage);
+            throw new ParsianErrorException($errorMessage, $status);
 
-		if ($this->refId != $authority)
-			throw new ParsianErrorException('تراکنشی یافت نشد', -1);
+        } else {
+            $this->transactionFailed();
+            $this->newLog(- 1, 'خطا در اتصال به درگاه پارسیان');
+            throw new ParsianErrorException('خطا در اتصال به درگاه پارسیان', - 1);
+        }
+    }
 
-		$params = array(
-			'pin' => $this->config->get('gateway.parsian.pin'),
-			'authority' => $authority,
-			'status' => 1
-		);
+    /**
+     * Verify payment
+     *
+     * @throws ParsianErrorException
+     */
+    protected function verifyPayment()
+    {
+        if( ! Input::has('au') && ! Input::has('rs'))
+            throw new ParsianErrorException('درخواست غیر معتبر', - 1);
 
-		try {
-			$soap = new SoapClient($this->serverUrl);
-			$result = $soap->PinPaymentEnquiry($params);
+        $authority = Input::get('au');
+        $status = Input::get('rs');
 
-		} catch (\SoapFault $e) {
-			throw new ParsianErrorException($e->getMessage(), -1);
-		}
+        if($status != 0) {
+            $errorMessage = ParsianResult::errorMessage($status);
+            $this->newLog($status, $errorMessage);
+            throw new ParsianErrorException($errorMessage, $status);
+        }
 
-		if ($result === false || !isset($result->status))
-			throw new ParsianErrorException('پاسخ دریافتی از بانک نامعتبر است.', -1);
+        if($this->refId != $authority)
+            throw new ParsianErrorException('تراکنشی یافت نشد', - 1);
 
-		if ($result->status != 0) {
-			$errorMessage = ParsianResult::errorMessage($result->status);
-			$this->transactionFailed();
-			$this->newLog($result->status, $errorMessage);
-			throw new ParsianErrorException($errorMessage, $result->status);
-		}
+        $params = [
+            'pin'       => $this->config->get('gateway.parsian.pin'),
+            'authority' => $authority,
+            'status'    => 1
+        ];
 
-		$this->trackingCode = $authority;
-		$this->transactionSucceed();
-		$this->newLog($result->status, ParsianResult::errorMessage($result->status));
-	}
+        try {
+            $soap = new SoapClient($this->serverUrl);
+            $result = $soap->PinPaymentEnquiry($params);
+
+        } catch(\SoapFault $e) {
+            throw new ParsianErrorException($e->getMessage(), - 1);
+        }
+
+        if($result === false || ! isset($result->status))
+            throw new ParsianErrorException('پاسخ دریافتی از بانک نامعتبر است.', - 1);
+
+        if($result->status != 0) {
+            $errorMessage = ParsianResult::errorMessage($result->status);
+            $this->transactionFailed();
+            $this->newLog($result->status, $errorMessage);
+            throw new ParsianErrorException($errorMessage, $result->status);
+        }
+
+        $this->trackingCode = $authority;
+        $this->transactionSucceed();
+        $this->newLog($result->status, ParsianResult::errorMessage($result->status));
+    }
+
+    /**
+     * Url which redirects to bank url.
+     *
+     * @return string
+     */
+    public function getGatewayUrl()
+    {
+        $url = $this->gateUrl . $this->refId();
+
+        return $url;
+    }
+
+    /**
+     * Parameters to pass to the gateway.
+     *
+     * @return array
+     */
+    public function redirectParameters()
+    {
+        return [];
+    }
 }

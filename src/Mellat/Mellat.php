@@ -5,230 +5,255 @@ namespace Larabookir\Gateway\Mellat;
 use DateTime;
 use Illuminate\Support\Facades\Input;
 use Larabookir\Gateway\Enum;
-use SoapClient;
 use Larabookir\Gateway\PortAbstract;
 use Larabookir\Gateway\PortInterface;
+use SoapClient;
 
-class Mellat extends PortAbstract implements PortInterface
-{
-	/**
-	 * Address of main SOAP server
-	 *
-	 * @var string
-	 */
-	protected $serverUrl = 'https://bpm.shaparak.ir/pgwchannel/services/pgw?wsdl';
+class Mellat extends PortAbstract implements PortInterface {
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function set($amount)
-	{
-		$this->amount = $amount;
+    /**
+     * Address of main SOAP server
+     *
+     * @var string
+     */
+    protected $serverUrl = 'https://bpm.shaparak.ir/pgwchannel/services/pgw?wsdl';
 
-		return $this;
-	}
+    /**
+     * {@inheritdoc}
+     */
+    public function set($amount)
+    {
+        $this->amount = $amount;
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function ready()
-	{
-		$this->sendPayRequest();
+        return $this;
+    }
 
-		return $this;
-	}
+    /**
+     * {@inheritdoc}
+     */
+    public function ready()
+    {
+        $this->sendPayRequest();
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function redirect()
-	{
-		$refId = $this->refId;
+        return $this;
+    }
 
-		return view('gateway::mellat-redirector')->with(compact('refId'));
-	}
+    /**
+     * {@inheritdoc}
+     */
+    public function redirect()
+    {
+        $refId = $this->refId;
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function verify($transaction)
-	{
-		parent::verify($transaction);
+        return view('gateway::mellat-redirector')->with(compact('refId'));
+    }
 
-		$this->userPayment();
-		$this->verifyPayment();
-		$this->settleRequest();
+    /**
+     * {@inheritdoc}
+     */
+    public function verify($transaction)
+    {
+        parent::verify($transaction);
 
-		return $this;
-	}
+        $this->userPayment();
+        $this->verifyPayment();
+        $this->settleRequest();
 
-	/**
-	 * Sets callback url
-	 * @param $url
-	 */
-	function setCallback($url)
-	{
-		$this->callbackUrl = $url;
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * Gets callback url
-	 * @return string
-	 */
-	function getCallback()
-	{
-		if (!$this->callbackUrl)
-			$this->callbackUrl = $this->config->get('gateway.mellat.callback-url');
+    /**
+     * Sets callback url
+     *
+     * @param $url
+     */
+    function setCallback($url)
+    {
+        $this->callbackUrl = $url;
 
-		return $this->makeCallback($this->callbackUrl, ['transaction_id' => $this->transactionId()]);
-	}
+        return $this;
+    }
 
-	/**
-	 * Send pay request to server
-	 *
-	 * @return void
-	 *
-	 * @throws MellatException
-	 */
-	protected function sendPayRequest()
-	{
-		$dateTime = new DateTime();
+    /**
+     * Gets callback url
+     * @return string
+     */
+    function getCallback()
+    {
+        if( ! $this->callbackUrl)
+            $this->callbackUrl = $this->config->get('gateway.mellat.callback-url');
 
-		$this->newTransaction();
+        return $this->makeCallback($this->callbackUrl, ['transaction_id' => $this->transactionId()]);
+    }
 
-		$fields = array(
-			'terminalId' => $this->config->get('gateway.mellat.terminalId'),
-			'userName' => $this->config->get('gateway.mellat.username'),
-			'userPassword' => $this->config->get('gateway.mellat.password'),
-			'orderId' => $this->transactionId(),
-			'amount' => $this->amount,
-			'localDate' => $dateTime->format('Ymd'),
-			'localTime' => $dateTime->format('His'),
-			'additionalData' => '',
-			'callBackUrl' => $this->getCallback(),
-			'payerId' => 0,
-		);
+    /**
+     * Send pay request to server
+     *
+     * @return void
+     *
+     * @throws MellatException
+     */
+    protected function sendPayRequest()
+    {
+        $dateTime = new DateTime();
 
-		try {
-			$soap = new SoapClient($this->serverUrl);
-			$response = $soap->bpPayRequest($fields);
+        $this->newTransaction();
 
-		} catch (\SoapFault $e) {
-			$this->transactionFailed();
-			$this->newLog('SoapFault', $e->getMessage());
-			throw $e;
-		}
+        $fields = [
+            'terminalId'     => $this->config->get('gateway.mellat.terminalId'),
+            'userName'       => $this->config->get('gateway.mellat.username'),
+            'userPassword'   => $this->config->get('gateway.mellat.password'),
+            'orderId'        => $this->transactionId(),
+            'amount'         => $this->amount,
+            'localDate'      => $dateTime->format('Ymd'),
+            'localTime'      => $dateTime->format('His'),
+            'additionalData' => '',
+            'callBackUrl'    => $this->getCallback(),
+            'payerId'        => 0,
+        ];
 
-		$response = explode(',', $response->return);
+        try {
+            $soap = new SoapClient($this->serverUrl);
+            $response = $soap->bpPayRequest($fields);
 
-		if ($response[0] != '0') {
-			$this->transactionFailed();
-			$this->newLog($response[0], MellatException::$errors[$response[0]]);
-			throw new MellatException($response[0]);
-		}
-		$this->refId = $response[1];
-		$this->transactionSetRefId();
-	}
+        } catch(\SoapFault $e) {
+            $this->transactionFailed();
+            $this->newLog('SoapFault', $e->getMessage());
+            throw $e;
+        }
 
-	/**
-	 * Check user payment
-	 *
-	 * @return bool
-	 *
-	 * @throws MellatException
-	 */
-	protected function userPayment()
-	{
-		$this->refId = Input::get('RefId');
-		$this->trackingCode = Input::get('SaleReferenceId');
-		$this->cardNumber = Input::get('CardHolderPan');
-		$payRequestResCode = Input::get('ResCode');
+        $response = explode(',', $response->return);
 
-		if ($payRequestResCode == '0') {
-			return true;
-		}
+        if($response[0] != '0') {
+            $this->transactionFailed();
+            $this->newLog($response[0], MellatException::$errors[$response[0]]);
+            throw new MellatException($response[0]);
+        }
+        $this->refId = $response[1];
+        $this->transactionSetRefId();
+    }
 
-		$this->transactionFailed();
-		$this->newLog($payRequestResCode, @MellatException::$errors[$payRequestResCode]);
-		throw new MellatException($payRequestResCode);
-	}
+    /**
+     * Check user payment
+     *
+     * @return bool
+     *
+     * @throws MellatException
+     */
+    protected function userPayment()
+    {
+        $this->refId = Input::get('RefId');
+        $this->trackingCode = Input::get('SaleReferenceId');
+        $this->cardNumber = Input::get('CardHolderPan');
+        $payRequestResCode = Input::get('ResCode');
 
-	/**
-	 * Verify user payment from bank server
-	 *
-	 * @return bool
-	 *
-	 * @throws MellatException
-	 * @throws SoapFault
-	 */
-	protected function verifyPayment()
-	{
-		$fields = array(
-			'terminalId' => $this->config->get('gateway.mellat.terminalId'),
-			'userName' => $this->config->get('gateway.mellat.username'),
-			'userPassword' => $this->config->get('gateway.mellat.password'),
-			'orderId' => $this->transactionId(),
-			'saleOrderId' => $this->transactionId(),
-			'saleReferenceId' => $this->trackingCode()
-		);
+        if($payRequestResCode == '0') {
+            return true;
+        }
 
-		try {
-			$soap = new SoapClient($this->serverUrl);
-			$response = $soap->bpVerifyRequest($fields);
+        $this->transactionFailed();
+        $this->newLog($payRequestResCode, @MellatException::$errors[$payRequestResCode]);
+        throw new MellatException($payRequestResCode);
+    }
 
-		} catch (\SoapFault $e) {
-			$this->transactionFailed();
-			$this->newLog('SoapFault', $e->getMessage());
-			throw $e;
-		}
+    /**
+     * Verify user payment from bank server
+     *
+     * @return bool
+     *
+     * @throws MellatException
+     * @throws SoapFault
+     */
+    protected function verifyPayment()
+    {
+        $fields = [
+            'terminalId'      => $this->config->get('gateway.mellat.terminalId'),
+            'userName'        => $this->config->get('gateway.mellat.username'),
+            'userPassword'    => $this->config->get('gateway.mellat.password'),
+            'orderId'         => $this->transactionId(),
+            'saleOrderId'     => $this->transactionId(),
+            'saleReferenceId' => $this->trackingCode()
+        ];
 
-		if ($response->return != '0') {
-			$this->transactionFailed();
-			$this->newLog($response->return, MellatException::$errors[$response->return]);
-			throw new MellatException($response->return);
-		}
+        try {
+            $soap = new SoapClient($this->serverUrl);
+            $response = $soap->bpVerifyRequest($fields);
 
-		return true;
-	}
+        } catch(\SoapFault $e) {
+            $this->transactionFailed();
+            $this->newLog('SoapFault', $e->getMessage());
+            throw $e;
+        }
 
-	/**
-	 * Send settle request
-	 *
-	 * @return bool
-	 *
-	 * @throws MellatException
-	 * @throws SoapFault
-	 */
-	protected function settleRequest()
-	{
-		$fields = array(
-			'terminalId' => $this->config->get('gateway.mellat.terminalId'),
-			'userName' => $this->config->get('gateway.mellat.username'),
-			'userPassword' => $this->config->get('gateway.mellat.password'),
-			'orderId' => $this->transactionId(),
-			'saleOrderId' => $this->transactionId(),
-			'saleReferenceId' => $this->trackingCode
-		);
+        if($response->return != '0') {
+            $this->transactionFailed();
+            $this->newLog($response->return, MellatException::$errors[$response->return]);
+            throw new MellatException($response->return);
+        }
 
-		try {
-			$soap = new SoapClient($this->serverUrl);
-			$response = $soap->bpSettleRequest($fields);
+        return true;
+    }
 
-		} catch (\SoapFault $e) {
-			$this->transactionFailed();
-			$this->newLog('SoapFault', $e->getMessage());
-			throw $e;
-		}
+    /**
+     * Send settle request
+     *
+     * @return bool
+     *
+     * @throws MellatException
+     * @throws SoapFault
+     */
+    protected function settleRequest()
+    {
+        $fields = [
+            'terminalId'      => $this->config->get('gateway.mellat.terminalId'),
+            'userName'        => $this->config->get('gateway.mellat.username'),
+            'userPassword'    => $this->config->get('gateway.mellat.password'),
+            'orderId'         => $this->transactionId(),
+            'saleOrderId'     => $this->transactionId(),
+            'saleReferenceId' => $this->trackingCode
+        ];
 
-		if ($response->return == '0' || $response->return == '45') {
-			$this->transactionSucceed();
-			$this->newLog($response->return, Enum::TRANSACTION_SUCCEED_TEXT);
-			return true;
-		}
+        try {
+            $soap = new SoapClient($this->serverUrl);
+            $response = $soap->bpSettleRequest($fields);
 
-		$this->transactionFailed();
-		$this->newLog($response->return, MellatException::$errors[$response->return]);
-		throw new MellatException($response->return);
-	}
+        } catch(\SoapFault $e) {
+            $this->transactionFailed();
+            $this->newLog('SoapFault', $e->getMessage());
+            throw $e;
+        }
+
+        if($response->return == '0' || $response->return == '45') {
+            $this->transactionSucceed();
+            $this->newLog($response->return, Enum::TRANSACTION_SUCCEED_TEXT);
+
+            return true;
+        }
+
+        $this->transactionFailed();
+        $this->newLog($response->return, MellatException::$errors[$response->return]);
+        throw new MellatException($response->return);
+    }
+
+    /**
+     * Url which redirects to bank url.
+     *
+     * @return string
+     */
+    public function getGatewayUrl()
+    {
+        return "https://bpm.shaparak.ir/pgwchannel/startpay.mellat";
+    }
+
+    /**
+     * Parameters to pass to the gateway.
+     *
+     * @return array
+     */
+    public function redirectParameters()
+    {
+        return [
+            'refId' => $this->refId,
+        ];
+    }
 }

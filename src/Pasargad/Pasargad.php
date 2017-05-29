@@ -4,59 +4,61 @@ namespace Larabookir\Gateway\Pasargad;
 
 use Illuminate\Support\Facades\Input;
 use Larabookir\Gateway\Enum;
-use SoapClient;
 use Larabookir\Gateway\PortAbstract;
 use Larabookir\Gateway\PortInterface;
 use Symfony\Component\VarDumper\Dumper\DataDumperInterface;
 
-class Pasargad extends PortAbstract implements PortInterface
-{
-	/**
-	 * Url of parsian gateway web service
-	 *
-	 * @var string
-	 */
+class Pasargad extends PortAbstract implements PortInterface {
 
-	protected $checkTransactionUrl = 'https://pep.shaparak.ir/CheckTransactionResult.aspx';
-	protected $verifyUrl = 'https://pep.shaparak.ir/VerifyPayment.aspx';
-	protected $refundUrl = 'https://pep.shaparak.ir/doRefund.aspx';
+    /**
+     * Url of parsian gateway web service
+     *
+     * @var string
+     */
 
-	/**
-	 * Address of gate for redirect
-	 *
-	 * @var string
-	 */
-	protected $gateUrl = 'https://pep.shaparak.ir/gateway.aspx';
+    protected $checkTransactionUrl = 'https://pep.shaparak.ir/CheckTransactionResult.aspx';
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function set($amount)
-	{
-		$this->amount = intval($amount);
-		return $this;
-	}
+    protected $verifyUrl = 'https://pep.shaparak.ir/VerifyPayment.aspx';
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function ready()
-	{
-		$this->sendPayRequest();
+    protected $refundUrl = 'https://pep.shaparak.ir/doRefund.aspx';
 
-		return $this;
-	}
+    /**
+     * Address of gate for redirect
+     *
+     * @var string
+     */
+    protected $gateUrl = 'https://pep.shaparak.ir/gateway.aspx';
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function redirect()
-	{
+    /**
+     * {@inheritdoc}
+     */
+    public function set($amount)
+    {
+        $this->amount = intval($amount);
 
-        $processor = new RSAProcessor($this->config->get('gateway.pasargad.certificate-path'),RSAKeyType::XMLFile);
+        return $this;
+    }
 
-		$url = $this->gateUrl;
-		$redirectUrl = $this->getCallback();
+    /**
+     * {@inheritdoc}
+     */
+    public function ready()
+    {
+        $this->sendPayRequest();
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function redirect()
+    {
+
+        $processor = new RSAProcessor($this->config->get('gateway.pasargad.certificate-path'), RSAKeyType::XMLFile);
+
+        $url = $this->gateUrl;
+        $redirectUrl = $this->getCallback();
         $invoiceNumber = $this->transactionId();
         $amount = $this->amount;
         $terminalCode = $this->config->get('gateway.pasargad.terminalId');
@@ -64,86 +66,122 @@ class Pasargad extends PortAbstract implements PortInterface
         $timeStamp = date("Y/m/d H:i:s");
         $invoiceDate = date("Y/m/d H:i:s");
         $action = 1003;
-        $data = "#". $merchantCode ."#". $terminalCode ."#". $invoiceNumber ."#". $invoiceDate ."#". $amount ."#". $redirectUrl ."#". $action ."#". $timeStamp ."#";
-        $data = sha1($data,true);
-        $data =  $processor->sign($data); // امضاي ديجيتال
-        $sign =  base64_encode($data); // base64_encode
+        $data = "#" . $merchantCode . "#" . $terminalCode . "#" . $invoiceNumber . "#" . $invoiceDate . "#" . $amount . "#" . $redirectUrl . "#" . $action . "#" . $timeStamp . "#";
+        $data = sha1($data, true);
+        $data = $processor->sign($data); // امضاي ديجيتال
+        $sign = base64_encode($data); // base64_encode
 
-		return view('gateway::pasargad-redirector')->with(compact('url','redirectUrl','invoiceNumber','invoiceDate','amount','terminalCode','merchantCode','timeStamp','action','sign'));
-	}
+        return view('gateway::pasargad-redirector')->with(compact('url', 'redirectUrl', 'invoiceNumber', 'invoiceDate', 'amount', 'terminalCode', 'merchantCode', 'timeStamp', 'action', 'sign'));
+    }
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function verify($transaction)
-	{
-		parent::verify($transaction);
+    /**
+     * {@inheritdoc}
+     */
+    public function verify($transaction)
+    {
+        parent::verify($transaction);
 
-		$this->verifyPayment();
+        $this->verifyPayment();
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * Sets callback url
-	 * @param $url
-	 */
-	function setCallback($url)
-	{
-		$this->callbackUrl = $url;
-		return $this;
-	}
+    /**
+     * Sets callback url
+     *
+     * @param $url
+     */
+    function setCallback($url)
+    {
+        $this->callbackUrl = $url;
 
-	/**
-	 * Gets callback url
-	 * @return string
-	 */
-	function getCallback()
-	{
-		if (!$this->callbackUrl)
-			$this->callbackUrl = $this->config->get('gateway.pasargad.callback-url');
+        return $this;
+    }
 
-		return $this->callbackUrl;
-	}
+    /**
+     * Gets callback url
+     * @return string
+     */
+    function getCallback()
+    {
+        if( ! $this->callbackUrl)
+            $this->callbackUrl = $this->config->get('gateway.pasargad.callback-url');
 
-	/**
-	 * Send pay request to parsian gateway
-	 *
-	 * @return bool
-	 *
-	 * @throws ParsianErrorException
-	 */
-	protected function sendPayRequest()
-	{
-		$this->newTransaction();
-	}
+        return $this->callbackUrl;
+    }
 
-	/**
-	 * Verify payment
-	 *
-	 * @throws ParsianErrorException
-	 */
-	protected function verifyPayment()
-	{
-        $fields = array(
+    /**
+     * Send pay request to parsian gateway
+     *
+     * @return bool
+     *
+     * @throws ParsianErrorException
+     */
+    protected function sendPayRequest()
+    {
+        $this->newTransaction();
+    }
+
+    /**
+     * Verify payment
+     *
+     * @throws ParsianErrorException
+     */
+    protected function verifyPayment()
+    {
+        $fields = [
             'invoiceUID' => Input::get('tref'),
-        );
+        ];
 
         $result = Parser::post2https($fields, $this->checkTransactionUrl);
         $array = Parser::makeXMLTree($result);
 
-
-		if ($array['result'] != "True") {
-			$this->newLog(-1, Enum::TRANSACTION_FAILED_TEXT);
-			$this->transactionFailed();
-			throw new PasargadErrorException(Enum::TRANSACTION_FAILED_TEXT, -1);
-		}
+        if($array['result'] != "True") {
+            $this->newLog(- 1, Enum::TRANSACTION_FAILED_TEXT);
+            $this->transactionFailed();
+            throw new PasargadErrorException(Enum::TRANSACTION_FAILED_TEXT, - 1);
+        }
 
         $this->refId = $array['transactionReferenceID'];
         $this->transactionSetRefId();
 
-		$this->trackingCode = $array['traceNumber'];
-		$this->transactionSucceed();
-		$this->newLog($array['result'], Enum::TRANSACTION_SUCCEED_TEXT);
-	}
+        $this->trackingCode = $array['traceNumber'];
+        $this->transactionSucceed();
+        $this->newLog($array['result'], Enum::TRANSACTION_SUCCEED_TEXT);
+    }
+
+    /**
+     * Url which redirects to bank url.
+     *
+     * @return string
+     */
+    public function getGatewayUrl()
+    {
+        return $this->gateUrl;
+    }
+
+    /**
+     * Parameters to pass to the gateway.
+     *
+     * @return array
+     */
+    public function redirectParameters()
+    {
+        $processor = new RSAProcessor($this->config->get('gateway.pasargad.certificate-path'), RSAKeyType::XMLFile);
+
+        $redirectUrl = $this->getCallback();
+        $invoiceNumber = $this->transactionId();
+        $amount = $this->amount;
+        $terminalCode = $this->config->get('gateway.pasargad.terminalId');
+        $merchantCode = $this->config->get('gateway.pasargad.merchantId');
+        $timeStamp = date("Y/m/d H:i:s");
+        $invoiceDate = date("Y/m/d H:i:s");
+        $action = 1003;
+        $data = "#" . $merchantCode . "#" . $terminalCode . "#" . $invoiceNumber . "#" . $invoiceDate . "#" . $amount . "#" . $redirectUrl . "#" . $action . "#" . $timeStamp . "#";
+        $data = sha1($data, true);
+        $data = $processor->sign($data); // امضاي ديجيتال
+        $sign = base64_encode($data); // base64_encode
+
+        return compact('redirectUrl', 'invoiceNumber', 'invoiceDate', 'amount', 'terminalCode', 'merchantCode', 'timeStamp', 'action', 'sign');
+    }
 }

@@ -2,9 +2,9 @@
 
 namespace Larabookir\Gateway\Sadad;
 
-use SoapClient;
 use Larabookir\Gateway\PortAbstract;
 use Larabookir\Gateway\PortInterface;
+use SoapClient;
 
 class Sadad extends PortAbstract implements PortInterface
 {
@@ -200,4 +200,24 @@ class Sadad extends PortAbstract implements PortInterface
 
 		return $result;
 	}
+
+    /**
+     * Url which redirects to bank url.
+     *
+     * @return string
+     */
+    public function getGatewayUrl()
+    {
+        return "";
+    }
+
+    /**
+     * Parameters to pass to the gateway.
+     *
+     * @return array
+     */
+    public function redirectParameters()
+    {
+        return [];
+    }
 }

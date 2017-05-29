@@ -4,12 +4,12 @@ namespace Larabookir\Gateway\JahanPay;
 
 use Illuminate\Support\Facades\Input;
 use Larabookir\Gateway\Enum;
-use SoapClient;
 use Larabookir\Gateway\PortAbstract;
 use Larabookir\Gateway\PortInterface;
+use SoapClient;
 
-class JahanPay extends PortAbstract implements PortInterface
-{
+class JahanPay extends PortAbstract implements PortInterface {
+
     /**
      * Address of main SOAP server
      *
@@ -49,7 +49,7 @@ class JahanPay extends PortAbstract implements PortInterface
      */
     public function redirect()
     {
-        return redirect()->to($this->gateUrl.$this->refId());
+        return redirect()->to($this->gateUrl . $this->refId());
     }
 
     /**
@@ -67,11 +67,13 @@ class JahanPay extends PortAbstract implements PortInterface
 
     /**
      * Sets callback url
+     *
      * @param $url
      */
     function setCallback($url)
     {
         $this->callbackUrl = $url;
+
         return $this;
     }
 
@@ -81,7 +83,7 @@ class JahanPay extends PortAbstract implements PortInterface
      */
     function getCallback()
     {
-        if (!$this->callbackUrl)
+        if( ! $this->callbackUrl)
             $this->callbackUrl = $this->config->get('gateway.jahanpay.callback-url');
 
         return $this->makeCallback($this->callbackUrl, ['transaction_id' => $this->transactionId()]);
@@ -114,9 +116,10 @@ class JahanPay extends PortAbstract implements PortInterface
             throw $e;
         }
 
-        if (intval($response) >= 0) {
+        if(intval($response) >= 0) {
             $this->refId = $response;
             $this->transactionSetRefId();
+
             return true;
         }
 
@@ -136,10 +139,10 @@ class JahanPay extends PortAbstract implements PortInterface
     {
         $refId = Input::get('au');
 
-        if ($this->refId() != $refId) {
+        if($this->refId() != $refId) {
             $this->transactionFailed();
-            $this->newLog(-30, JahanPayException::$errors[-30]);
-            throw new JahanPayException(-30);
+            $this->newLog(- 30, JahanPayException::$errors[- 30]);
+            throw new JahanPayException(- 30);
         }
 
         return true;
@@ -168,14 +171,35 @@ class JahanPay extends PortAbstract implements PortInterface
             throw $e;
         }
 
-        if (intval($response) == 1) {
+        if(intval($response) == 1) {
             $this->transactionSucceed();
             $this->newLog($response, Enum::TRANSACTION_SUCCEED_TEXT);
+
             return true;
         }
 
         $this->transactionFailed();
         $this->newLog($response, JahanPayException::$errors[$response]);
         throw new JahanPayException($response);
+    }
+
+    /**
+     * Url which redirects to bank url.
+     *
+     * @return string
+     */
+    public function getGatewayUrl()
+    {
+        return $this->gateUrl . $this->refId();
+    }
+
+    /**
+     * Parameters to pass to the gateway.
+     *
+     * @return array
+     */
+    public function redirectParameters()
+    {
+        return [];
     }
 }
