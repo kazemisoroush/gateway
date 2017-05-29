@@ -169,7 +169,7 @@ class Pasargad extends PortAbstract implements PortInterface {
     {
         $processor = new RSAProcessor($this->config->get('gateway.pasargad.certificate-path'), RSAKeyType::XMLFile);
 
-        $redirectUrl = $this->getCallback();
+        $redirectAddress = $this->getCallback();
         $invoiceNumber = $this->transactionId();
         $amount = $this->amount;
         $terminalCode = $this->config->get('gateway.pasargad.terminalId');
@@ -177,11 +177,11 @@ class Pasargad extends PortAbstract implements PortInterface {
         $timeStamp = date("Y/m/d H:i:s");
         $invoiceDate = date("Y/m/d H:i:s");
         $action = 1003;
-        $data = "#" . $merchantCode . "#" . $terminalCode . "#" . $invoiceNumber . "#" . $invoiceDate . "#" . $amount . "#" . $redirectUrl . "#" . $action . "#" . $timeStamp . "#";
+        $data = "#" . $merchantCode . "#" . $terminalCode . "#" . $invoiceNumber . "#" . $invoiceDate . "#" . $amount . "#" . $redirectAddress . "#" . $action . "#" . $timeStamp . "#";
         $data = sha1($data, true);
         $data = $processor->sign($data); // امضاي ديجيتال
         $sign = base64_encode($data); // base64_encode
 
-        return compact('redirectUrl', 'invoiceNumber', 'invoiceDate', 'amount', 'terminalCode', 'merchantCode', 'timeStamp', 'action', 'sign');
+        return compact('redirectAddress', 'invoiceNumber', 'invoiceDate', 'amount', 'terminalCode', 'merchantCode', 'timeStamp', 'action', 'sign');
     }
 }

@@ -7,8 +7,8 @@ use Larabookir\Gateway\PortAbstract;
 use Larabookir\Gateway\PortInterface;
 use SoapClient;
 
-class Saman extends PortAbstract implements PortInterface
-{
+class Saman extends PortAbstract implements PortInterface {
+
     /**
      * Address of main SOAP server
      *
@@ -73,6 +73,7 @@ class Saman extends PortAbstract implements PortInterface
     function setCallback($url)
     {
         $this->callbackUrl = $url;
+
         return $this;
     }
 
@@ -83,7 +84,7 @@ class Saman extends PortAbstract implements PortInterface
      */
     function getCallback()
     {
-        if (!$this->callbackUrl)
+        if( ! $this->callbackUrl)
             $this->callbackUrl = $this->config->get('gateway.saman.callback-url');
 
         $url = $this->makeCallback($this->callbackUrl, ['transaction_id' => $this->transactionId()]);
@@ -105,7 +106,7 @@ class Saman extends PortAbstract implements PortInterface
         $payRequestRes = Input::get('State');
         $payRequestResCode = Input::get('StateCode');
 
-        if ($payRequestRes == 'OK') {
+        if($payRequestRes == 'OK') {
             return true;
         }
 
@@ -113,7 +114,6 @@ class Saman extends PortAbstract implements PortInterface
         $this->newLog($payRequestResCode, @SamanException::$errors[$payRequestRes]);
         throw new SamanException($payRequestRes);
     }
-
 
     /**
      * Verify user payment from bank server.
@@ -125,16 +125,16 @@ class Saman extends PortAbstract implements PortInterface
      */
     protected function verifyPayment()
     {
-        $fields = array(
+        $fields = [
             "merchantID" => $this->config->get('gateway.saman.merchant'),
-            "RefNum" => $this->refId,
-            "password" => $this->config->get('gateway.saman.password'),
-        );
+            "RefNum"     => $this->refId,
+            "password"   => $this->config->get('gateway.saman.password'),
+        ];
 
         try {
             $soap = new SoapClient($this->serverUrl);
             $response = $soap->VerifyTransaction($fields["RefNum"], $fields["merchantID"]);
-        } catch (\SoapFault $e) {
+        } catch(\SoapFault $e) {
             $this->transactionFailed();
             $this->newLog('SoapFault', $e->getMessage());
             throw $e;
@@ -142,15 +142,15 @@ class Saman extends PortAbstract implements PortInterface
 
         $response = intval($response);
 
-        if ($response != $this->amount) {
+        if($response != $this->amount) {
 
             //Reverse Transaction
-            if($response>0){
+            if($response > 0) {
                 try {
                     $soap = new SoapClient($this->serverUrl);
                     $response = $soap->ReverseTransaction($fields["RefNum"], $fields["merchantID"], $fields["password"], $response);
 
-                } catch (\SoapFault $e) {
+                } catch(\SoapFault $e) {
                     $this->transactionFailed();
                     $this->newLog('SoapFault', $e->getMessage());
                     throw $e;
@@ -162,7 +162,6 @@ class Saman extends PortAbstract implements PortInterface
             $this->newLog($response, SamanException::$errors[$response]);
             throw new SamanException($response);
         }
-
 
         $this->transactionSucceed();
 
@@ -187,10 +186,10 @@ class Saman extends PortAbstract implements PortInterface
     public function redirectParameters()
     {
         return [
-            'amount'      => $this->amount,
-            'merchant'    => $this->config->get('gateway.saman.merchant'),
-            'resNum'      => $this->transactionId(),
-            'callBackUrl' => $this->getCallback()
+            'Amount'      => $this->amount,
+            'MID'         => $this->config->get('gateway.saman.merchant'),
+            'ResNum'      => $this->transactionId(),
+            'RedirectURL' => $this->getCallback()
         ];
     }
 }

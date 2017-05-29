@@ -49,7 +49,7 @@
 
 			var redirectAddress = document.createElement("input");
 			redirectAddress.setAttribute("name", "redirectAddress");
-			redirectAddress.setAttribute("value", "{{$redirectUrl}}");
+			redirectAddress.setAttribute("value", "{{$redirectAddress}}");
             form.appendChild(redirectAddress);
 
 			document.body.appendChild(form);

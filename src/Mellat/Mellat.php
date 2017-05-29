@@ -253,7 +253,7 @@ class Mellat extends PortAbstract implements PortInterface {
     public function redirectParameters()
     {
         return [
-            'refId' => $this->refId,
+            'RefId' => $this->refId,
         ];
     }
 }
