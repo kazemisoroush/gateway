@@ -122,14 +122,14 @@ class SadadResult
         array(
             'code' => 9010,
             'message'=>'wait_for_reversal_auto',
-            'fa' => 'تراکنش به لیست تراکنش های برگشت خودکار اضافه شده است و در انتظار برگشت می باشد.',
+            'fa' => 'تراکنش به لیست تراکنش های برگشت خودکار اضافه شده است و در انتظار برگشت است.',
             'en' => 'The transaction is automatically added to the list of back transactions and is expected to return.',
             'retry' => true,
         ),
         array(
             'code' => 9011,
             'message'=>'pendingcurrenttransaction',
-            'fa' => 'تراکنش برگشت خرید ارسال شده است اما پاسخ دریافت شده قطعی نیست و تراکنش در لیست تراکنش های معوق می باشد و نتیجه عملیات بانکی ظرف 24 ساعت آینده مشخص خواهد شد.',
+            'fa' => 'تراکنش برگشت خرید ارسال شده است اما پاسخ دریافت شده قطعی نیست و تراکنش در لیست تراکنش های معوق است و نتیجه عملیات بانکی ظرف 24 ساعت آینده مشخص خواهد شد.',
             'en' => 'Back purchase transaction has been sent but not conclusive answer has been received and the transaction is on the list of pending transactions and banking operations will be determined within the next 24 hours.',
             'retry' => false,
         ),
