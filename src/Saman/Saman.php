@@ -107,6 +107,8 @@ class Saman extends PortAbstract implements PortInterface {
         $payRequestResCode = Input::get('StateCode');
 
         if($payRequestRes == 'OK') {
+            $this->transactionSetRefId();
+
             return true;
         }
 
