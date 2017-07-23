@@ -253,14 +253,13 @@ class AsanPardakht extends PortAbstract implements PortInterface {
      */
     protected function sendPayRequest()
     {
-        // make new transaction for this payment request...
-        $this->newTransaction();
 
         // gather the parameters to make raw request...
         $serviceCode = ServiceEnum::PURCHASE;
         $username = $this->config->get('gateway.asan-pardakht.username');
         $password = $this->config->get('gateway.asan-pardakht.password');
-        $orderId = $this->transactionId();
+        // also make new transaction for this payment request...
+        $orderId = $this->newTransaction();
         $amount = $this->getAmount();
         $date = date("Ymd His");
         $additionalData = "";
