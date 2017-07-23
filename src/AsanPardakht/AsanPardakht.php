@@ -215,6 +215,11 @@ class AsanPardakht extends PortAbstract implements PortInterface {
             throw new AsanPardakhtException(- 994);
         }
 
+        // set some variables...
+        $this->refId = $refId;
+        $this->trackingCode = $resCode;
+        $this->cardNumber = $lastFourDigitOfPan;
+
         // transaction is successful...
         $this->transactionSetRefId();
 
