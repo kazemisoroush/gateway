@@ -7,13 +7,14 @@ Please inform us once you've encountered [bug](https://github.com/larabook/gatew
 
 Available Banks:
  1. MELLAT
- 2. SADAD (MELLI)
+ 2. ASAN PARDAKHT
+ 3. SADAD (MELLI)
  3. SAMAN
- 3. PARSIAN
- 4. PASARGAD
- 5. ZARINPAL
- 6. JAHANPAY
- 7. PAYLINE
+ 4. PARSIAN
+ 5. PASARGAD
+ 6. ZARINPAL
+ 7. JAHANPAY
+ 8. PAYLINE
 
 ----------
 
