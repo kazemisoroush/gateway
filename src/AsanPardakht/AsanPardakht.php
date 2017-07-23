@@ -302,6 +302,7 @@ class AsanPardakht extends PortAbstract implements PortInterface {
             $this->parameters = [
                 'RefId' => $result{1}
             ];
+            $this->refId = $result{1};
         } else {
             // something went wrong...
             throw new AsanPardakhtException($result);
