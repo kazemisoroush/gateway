@@ -142,7 +142,7 @@ class AsanPardakht extends PortAbstract implements PortInterface {
 
         $encryptedCredentials = $this->encrypt("{$username},{$password}");
         $params = [
-            'merchantConfigurationID' => $this->config->get('merchant-configuration-id'),
+            'merchantConfigurationID' => $this->config->get('gateway.asan-pardakht.merchant-configuration-id'),
             'encryptedCredentials'    => $encryptedCredentials,
             'payGateTranID'           => $payGateTranID
         ];
@@ -284,7 +284,7 @@ class AsanPardakht extends PortAbstract implements PortInterface {
         }
 
         $parameters = [
-            'merchantConfigurationID' => $this->config->get('merchant-configuration-id'),
+            'merchantConfigurationID' => $this->config->get('gateway.asan-pardakht.merchant-configuration-id'),
             'encryptedRequest'        => $encryptedRequest
         ];
 
