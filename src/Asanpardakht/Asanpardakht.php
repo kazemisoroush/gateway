@@ -191,6 +191,8 @@ class Asanpardakht extends PortAbstract implements PortInterface {
 
         // transaction is successful...
         // $this->transactionSetRefId();
+        $this->transactionSucceed();
+        // $this->newLog($response->return, Enum::TRANSACTION_SUCCEED_TEXT);
 
         return true;
     }
