@@ -10,7 +10,7 @@ abstract class PortAbstract {
     /**
      * Transaction id
      *
-     * @var null|int
+     * @var null | integer
      */
     protected $transactionId = null;
 
