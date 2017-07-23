@@ -38,7 +38,7 @@ class AsanPardakht extends PortAbstract implements PortInterface {
      *
      * @var array
      */
-    protected $parameters;
+    protected $parameters = [];
 
     /**
      * Set the transaction amount.
@@ -267,6 +267,8 @@ class AsanPardakht extends PortAbstract implements PortInterface {
 
         // make the raw request string...
         $rawRequest = "{$serviceCode},{$username},{$password},{$orderId},{$amount},{$date},{$additionalData},{$this->getCallback()},0";
+
+        Log::info($rawRequest);
 
         // encrypt the request...
         $encryptedRequest = $this->encrypt($rawRequest);
