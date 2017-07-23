@@ -260,13 +260,13 @@ class AsanPardakht extends PortAbstract implements PortInterface {
         $serviceCode = ServiceEnum::PURCHASE;
         $username = $this->config->get('gateway.asan-pardakht.username');
         $password = $this->config->get('gateway.asan-pardakht.password');
-        $orderId = rand();
+        $orderId = $this->refId;
         $amount = $this->getAmount();
         $date = date("Ymd His");
         $additionalData = "";
 
         // make the raw request string...
-        $rawRequest = "{$serviceCode},{$username},{$password},{$orderId},{$amount},{$date},{$additionalData},{$this->getCallback()},0";
+         $rawRequest = "{$serviceCode},{$username},{$password},{$orderId},{$amount},{$date},{$additionalData},{$this->getCallback()},0";
 
         // encrypt the request...
         $encryptedRequest = $this->encrypt($rawRequest);
