@@ -97,7 +97,7 @@ class Saman extends PortAbstract implements PortInterface {
      *
      * @return bool
      *
-     * @throws SamanException
+     * @throws AsanPardakhtException
      */
     protected function userPayment()
     {
@@ -113,8 +113,8 @@ class Saman extends PortAbstract implements PortInterface {
         }
 
         $this->transactionFailed();
-        $this->newLog($payRequestResCode, @SamanException::$errors[$payRequestRes]);
-        throw new SamanException($payRequestRes);
+        $this->newLog($payRequestResCode, @AsanPardakhtException::$errors[$payRequestRes]);
+        throw new AsanPardakhtException($payRequestRes);
     }
 
     /**
@@ -122,7 +122,7 @@ class Saman extends PortAbstract implements PortInterface {
      *
      * @return bool
      *
-     * @throws \Larabookir\Gateway\Saman\SamanException
+     * @throws \Larabookir\Gateway\Saman\AsanPardakhtException
      * @throws \SoapFault
      */
     protected function verifyPayment()
@@ -161,8 +161,8 @@ class Saman extends PortAbstract implements PortInterface {
 
             //
             $this->transactionFailed();
-            $this->newLog($response, SamanException::$errors[$response]);
-            throw new SamanException($response);
+            $this->newLog($response, AsanPardakhtException::$errors[$response]);
+            throw new AsanPardakhtException($response);
         }
 
         $this->transactionSucceed();

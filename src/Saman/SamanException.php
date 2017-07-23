@@ -46,9 +46,9 @@ class SamanException extends BankException
         -18 => "IP Address فروشنده نا معتبر است"
     );
 
-    public function __construct($errorRef)
+    public function __construct($errorCode)
     {
-        $this->errorRef = $errorRef;
+        $this->errorRef = $errorCode;
 
         parent::__construct(@self::$errors[$this->errorRef].' ('.$this->errorRef.')', intval($this->errorRef));
     }

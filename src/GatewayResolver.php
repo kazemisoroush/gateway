@@ -2,19 +2,18 @@
 
 namespace Larabookir\Gateway;
 
-use Larabookir\Gateway\Parsian\Parsian;
-use Larabookir\Gateway\Sadad\Sadad;
-use Larabookir\Gateway\Mellat\Mellat;
-use Larabookir\Gateway\Payline\Payline;
-use Larabookir\Gateway\Pasargad\Pasargad;
-use Larabookir\Gateway\Saman\Saman;
-use Larabookir\Gateway\Zarinpal\Zarinpal;
-use Larabookir\Gateway\JahanPay\JahanPay;
-use Larabookir\Gateway\Exceptions\RetryException;
-use Larabookir\Gateway\Exceptions\PortNotFoundException;
+use Illuminate\Support\Facades\DB;
 use Larabookir\Gateway\Exceptions\InvalidRequestException;
 use Larabookir\Gateway\Exceptions\NotFoundTransactionException;
-use Illuminate\Support\Facades\DB;
+use Larabookir\Gateway\Exceptions\PortNotFoundException;
+use Larabookir\Gateway\Exceptions\RetryException;
+use Larabookir\Gateway\JahanPay\JahanPay;
+use Larabookir\Gateway\Mellat\Mellat;
+use Larabookir\Gateway\Parsian\Parsian;
+use Larabookir\Gateway\Payline\Payline;
+use Larabookir\Gateway\Sadad\Sadad;
+use Larabookir\Gateway\Saman\AsanPardakht;
+use Larabookir\Gateway\Zarinpal\Zarinpal;
 
 class GatewayResolver
 {
@@ -29,7 +28,7 @@ class GatewayResolver
 	/**
 	 * Keep current port driver
 	 *
-	 * @var Mellat|Saman|Sadad|Zarinpal|Payline|JahanPay|Parsian
+	 * @var Mellat|AsanPardakht|Sadad|Zarinpal|Payline|JahanPay|Parsian
 	 */
 	protected $port;
 
@@ -130,7 +129,7 @@ class GatewayResolver
 			$name = Enum::MELLAT;
 		} elseif ($port InstanceOf Parsian) {
 			$name = Enum::PARSIAN;
-		} elseif ($port InstanceOf Saman) {
+		} elseif ($port InstanceOf AsanPardakht) {
             $name = Enum::SAMAN;
         } elseif ($port InstanceOf Payline) {
 			$name = Enum::PAYLINE;
