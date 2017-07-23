@@ -1,10 +1,10 @@
 <?php
 
-namespace Larabookir\Gateway\AsanPardakht;
+namespace Larabookir\Gateway\Asanpardakht;
 
 use Larabookir\Gateway\Exceptions\BankException;
 
-class AsanPardakhtException extends BankException {
+class AsanpardakhtException extends BankException {
 
     /**
      * All different kinds of errors.

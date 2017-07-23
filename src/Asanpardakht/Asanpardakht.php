@@ -1,6 +1,6 @@
 <?php
 
-namespace Larabookir\Gateway\AsanPardakht;
+namespace Larabookir\Gateway\Asanpardakht;
 
 use Illuminate\Support\Facades\Input;
 use Larabookir\Gateway\PortAbstract;
@@ -8,9 +8,9 @@ use Larabookir\Gateway\PortInterface;
 use SoapClient;
 use SoapFault;
 
-class AsanPardakht extends PortAbstract implements PortInterface {
+class Asanpardakht extends PortAbstract implements PortInterface {
 
-    use AsanPardakhtHelper;
+    use AsanpardakhtHelper;
 
     /**
      * Address of main SOAP server.
@@ -99,7 +99,7 @@ class AsanPardakht extends PortAbstract implements PortInterface {
      *
      * @return boolean
      *
-     * @throws AsanPardakhtException
+     * @throws AsanpardakhtException
      */
     protected function verifyPayment()
     {
@@ -122,7 +122,7 @@ class AsanPardakht extends PortAbstract implements PortInterface {
         // check the transaction status...
         if($resCode != '0' and $resCode != '00') {
             $this->transactionFailed();
-            throw new AsanPardakhtException(- 998);
+            throw new AsanpardakhtException(- 998);
         }
 
         // set options and parameters to make client with...
@@ -135,7 +135,7 @@ class AsanPardakht extends PortAbstract implements PortInterface {
         } catch(SoapFault $exception) {
             $this->transactionFailed();
             // error in calling the web service...
-            throw new AsanPardakhtException(- 999);
+            throw new AsanpardakhtException(- 999);
         }
         $username = $this->config->get('gateway.asan-pardakht.username');
         $password = $this->config->get('gateway.asan-pardakht.password');
@@ -150,38 +150,38 @@ class AsanPardakht extends PortAbstract implements PortInterface {
         // verify the payment...
         if( ! ($result = $client->RequestVerification($params))) {
             $this->transactionFailed();
-            throw new AsanPardakhtException(- 997);
+            throw new AsanpardakhtException(- 997);
         }
 
         // check if verification is successful...
         $result = $result->RequestVerificationResult;
         if($result != '500') {
             $this->transactionFailed();
-            throw new AsanPardakhtException($result);
+            throw new AsanpardakhtException($result);
         }
 
         // settlement...
         if( ! ($result = $client->RequestReconciliation($params))) {
             $this->transactionFailed();
-            throw new AsanPardakhtException(- 996);
+            throw new AsanpardakhtException(- 996);
         }
 
         // check the transaction settlement...
         $result = $result->RequestReconciliationResult;
         if($result != '600') {
             $this->transactionFailed();
-            throw new AsanPardakhtException($result);
+            throw new AsanpardakhtException($result);
         }
 
         // check the amount...
         if($amount != $this->amount) {
             $this->transactionFailed();
-            throw new AsanPardakhtException(- 995);
+            throw new AsanpardakhtException(- 995);
         }
 
         if($this->refId != $refId) {
             $this->transactionFailed();
-            throw new AsanPardakhtException(- 994);
+            throw new AsanpardakhtException(- 994);
         }
 
         // set some variables...
@@ -249,7 +249,7 @@ class AsanPardakht extends PortAbstract implements PortInterface {
      * Send pay request to the payment server. It simply makes an encrypted request and sends it to the server through
      * soap client.
      *
-     * @throws AsanPardakhtException
+     * @throws AsanpardakhtException
      */
     protected function sendPayRequest()
     {
@@ -279,7 +279,7 @@ class AsanPardakht extends PortAbstract implements PortInterface {
             $client = @new soapclient($this->serverUrl, $parameters);
         } catch(SoapFault $exception) {
             // error in calling the web service...
-            throw new AsanPardakhtException(- 999);
+            throw new AsanpardakhtException(- 999);
         }
 
         $parameters = [
@@ -289,7 +289,7 @@ class AsanPardakht extends PortAbstract implements PortInterface {
 
         if( ! ($result = $client->RequestOperation($parameters))) {
             // cannot call the request method...
-            throw new AsanPardakhtException($result);
+            throw new AsanpardakhtException($result);
         }
 
         // array of result consists of two parts...
@@ -305,14 +305,14 @@ class AsanPardakht extends PortAbstract implements PortInterface {
             ];
         } else {
             // something went wrong...
-            throw new AsanPardakhtException($result);
+            throw new AsanpardakhtException($result);
         }
 
         $this->transactionSetRefId();
     }
 
     /**
-     * @throws AsanPardakhtException
+     * @throws AsanpardakhtException
      */
     protected function testIp()
     {
@@ -320,11 +320,11 @@ class AsanPardakht extends PortAbstract implements PortInterface {
             $client = @new soapclient($this->hostInfoUrl);
         } catch(SoapFault $exception) {
             // error in calling the web service...
-            throw new AsanPardakhtException(- 999);
+            throw new AsanpardakhtException(- 999);
         }
 
         if( ! ($result = $client->GetHostInfo())) {
-            throw new AsanPardakhtException(- 993);
+            throw new AsanpardakhtException(- 993);
         }
     }
 

@@ -3,7 +3,7 @@
 namespace Larabookir\Gateway;
 
 use Illuminate\Support\Facades\DB;
-use Larabookir\Gateway\AsanPardakht\AsanPardakht;
+use Larabookir\Gateway\Asanpardakht\Asanpardakht;
 use Larabookir\Gateway\Exceptions\InvalidRequestException;
 use Larabookir\Gateway\Exceptions\NotFoundTransactionException;
 use Larabookir\Gateway\Exceptions\PortNotFoundException;
@@ -153,7 +153,7 @@ class GatewayResolver {
             $name = Enum::PARSIAN;
         } else if($port InstanceOf Saman) {
             $name = Enum::SAMAN;
-        } else if($port InstanceOf AsanPardakht) {
+        } else if($port InstanceOf Asanpardakht) {
             $name = Enum::ASANPARDAKHT;
         } else if($port InstanceOf Payline) {
             $name = Enum::PAYLINE;

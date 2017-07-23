@@ -1,8 +1,8 @@
 <?php
 
-namespace Larabookir\Gateway\AsanPardakht;
+namespace Larabookir\Gateway\Asanpardakht;
 
-trait AsanPardakhtHelper {
+trait AsanpardakhtHelper {
 
     /**
      * The main encrypt method for asan pardakht.
