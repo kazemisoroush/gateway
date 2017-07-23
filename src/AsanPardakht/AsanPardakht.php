@@ -315,11 +315,14 @@ class AsanPardakht extends PortAbstract implements PortInterface {
     protected function testIp()
     {
         try {
-            @new soapclient($this->hostInfoUrl);
+            $client = @new soapclient($this->hostInfoUrl);
         } catch(SoapFault $exception) {
-            // TODO: handle the error...
             // error in calling the web service...
-            throw new AsanPardakhtException(- 1);
+            throw new AsanPardakhtException(- 999);
+        }
+
+        if( ! ($result = $client->GetHostInfo())) {
+            throw new AsanPardakhtException(- 993);
         }
     }
 
