@@ -1,5 +1,7 @@
 <?php
 
+namespace Larabookir\Gateway\AsanPardakht;
+
 trait AsanPardakhtHelper {
 
     /**

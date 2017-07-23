@@ -2,7 +2,6 @@
 
 namespace Larabookir\Gateway\AsanPardakht;
 
-use AsanPardakhtHelper;
 use Illuminate\Support\Facades\Input;
 use Larabookir\Gateway\PortAbstract;
 use Larabookir\Gateway\PortInterface;
@@ -93,36 +92,6 @@ class AsanPardakht extends PortAbstract implements PortInterface {
         $this->verifyPayment();
 
         return $this;
-    }
-
-    /**
-     * Set callback url.
-     *
-     * @param string $url
-     *
-     * @return $this | string
-     */
-    function setCallback($url)
-    {
-        $this->callbackUrl = $url;
-
-        return $this;
-    }
-
-    /**
-     * Gets callback url.
-     *
-     * @return string
-     */
-    function getCallback()
-    {
-        if( ! $this->callbackUrl) {
-            $this->callbackUrl = $this->config->get('gateway.asanpardakht.callback-url');
-        }
-
-        $url = $this->makeCallback($this->callbackUrl, ['transaction_id' => $this->transactionId()]);
-
-        return $url;
     }
 
     /**
@@ -224,6 +193,36 @@ class AsanPardakht extends PortAbstract implements PortInterface {
         $this->transactionSetRefId();
 
         return true;
+    }
+
+    /**
+     * Set callback url.
+     *
+     * @param string $url
+     *
+     * @return $this | string
+     */
+    function setCallback($url)
+    {
+        $this->callbackUrl = $url;
+
+        return $this;
+    }
+
+    /**
+     * Gets callback url.
+     *
+     * @return string
+     */
+    function getCallback()
+    {
+        if( ! $this->callbackUrl) {
+            $this->callbackUrl = $this->config->get('gateway.asanpardakht.callback-url');
+        }
+
+        $url = $this->makeCallback($this->callbackUrl, ['transaction_id' => $this->transactionId()]);
+
+        return $url;
     }
 
     /**
