@@ -260,7 +260,7 @@ class AsanPardakht extends PortAbstract implements PortInterface {
         $serviceCode = ServiceEnum::PURCHASE;
         $username = $this->config->get('gateway.asan-pardakht.username');
         $password = $this->config->get('gateway.asan-pardakht.password');
-        $orderId = $this->refId;
+        $orderId = $this->trackingCode;
         $amount = $this->getAmount();
         $date = date("Ymd His");
         $additionalData = "";
