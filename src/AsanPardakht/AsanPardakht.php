@@ -299,10 +299,10 @@ class AsanPardakht extends PortAbstract implements PortInterface {
         // if first part of result is zero then the operation is succeeded...
         if($result{0} == '0') {
             // we need to send this to payment url...
+            $this->refId = explode(',', $result)[1];
             $this->parameters = [
-                'RefId' => $result{1}
+                'RefId' => $this->refId
             ];
-            $this->refId = $result{1};
         } else {
             // something went wrong...
             throw new AsanPardakhtException($result);
