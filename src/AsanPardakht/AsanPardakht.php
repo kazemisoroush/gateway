@@ -190,7 +190,7 @@ class AsanPardakht extends PortAbstract implements PortInterface {
         $this->cardNumber = $lastFourDigitOfPan;
 
         // transaction is successful...
-        $this->transactionSetRefId();
+        // $this->transactionSetRefId();
 
         return true;
     }
@@ -306,6 +306,8 @@ class AsanPardakht extends PortAbstract implements PortInterface {
             // something went wrong...
             throw new AsanPardakhtException($result);
         }
+
+        $this->transactionSetRefId();
     }
 
     /**
