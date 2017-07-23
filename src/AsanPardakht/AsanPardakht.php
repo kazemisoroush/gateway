@@ -217,7 +217,7 @@ class AsanPardakht extends PortAbstract implements PortInterface {
     function getCallback()
     {
         if( ! $this->callbackUrl) {
-            $this->callbackUrl = $this->config->get('gateway.asanpardakht.callback-url');
+            $this->callbackUrl = $this->config->get('gateway.asan-pardakht.callback-url');
         }
 
         $url = $this->makeCallback($this->callbackUrl, ['transaction_id' => $this->transactionId()]);
@@ -267,8 +267,6 @@ class AsanPardakht extends PortAbstract implements PortInterface {
 
         // make the raw request string...
         $rawRequest = "{$serviceCode},{$username},{$password},{$orderId},{$amount},{$date},{$additionalData},{$this->getCallback()},0";
-
-        Log::info($rawRequest);
 
         // encrypt the request...
         $encryptedRequest = $this->encrypt($rawRequest);
