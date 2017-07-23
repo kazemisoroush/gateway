@@ -117,7 +117,7 @@ class Asanpardakht extends PortAbstract implements PortInterface {
         $resMessage = $parameters[4];
         $payGateTranID = $parameters[5];
         $rrn = $parameters[6];
-        $lastFourDigitOfPan = $parameters[7];
+        $cardNumber = "************{$parameters[7]}";
 
         // check the transaction status...
         if($resCode != '0' and $resCode != '00') {
@@ -186,8 +186,8 @@ class Asanpardakht extends PortAbstract implements PortInterface {
 
         // set some variables...
         $this->refId = $refId;
-        $this->trackingCode = $resCode;
-        $this->cardNumber = $lastFourDigitOfPan;
+        $this->trackingCode = $payGateTranID;
+        $this->cardNumber = $cardNumber;
 
         // transaction is successful...
         // $this->transactionSetRefId();
