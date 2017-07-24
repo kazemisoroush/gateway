@@ -53,10 +53,15 @@ class MellatException extends BankException {
         61  => 'خطا در واریز'
     ];
 
+    /**
+     * Make new class of this type.
+     *
+     * @param string $errorCode
+     */
     public function __construct($errorCode)
     {
         $code = intval($errorCode);
 
-        parent::__construct($this->errors[$code], $errorCode);
+        parent::__construct($this->errors[$code], $code);
     }
 }
