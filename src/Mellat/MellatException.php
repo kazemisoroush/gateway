@@ -57,6 +57,6 @@ class MellatException extends BankException {
     {
         $code = intval($errorCode);
 
-        parent::__construct($this->errors[$code], $this->errorId);
+        parent::__construct($this->errors[$code], $errorCode);
     }
 }
