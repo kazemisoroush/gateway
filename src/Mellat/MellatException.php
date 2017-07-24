@@ -6,7 +6,7 @@ use Larabookir\Gateway\Exceptions\BankException;
 
 class MellatException extends BankException {
 
-    public $errors = [
+    static public $errors = [
         11  => 'شماره کارت نامعتبر است.',
         12  => 'موجودی کافی نیست.',
         13  => 'رمز نادرست است.',
@@ -62,6 +62,6 @@ class MellatException extends BankException {
     {
         $code = intval($errorCode);
 
-        parent::__construct($this->errors[$code], $code);
+        parent::__construct(@self::$errors[$code], $code);
     }
 }
