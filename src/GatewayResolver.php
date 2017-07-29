@@ -103,6 +103,27 @@ class GatewayResolver {
     }
 
     /**
+     * Get transaction id returning from gateway.
+     *
+     * @return integer
+     * @throws InvalidRequestException
+     */
+    public function getTransactionId()
+    {
+        if( ! $this->request->has('transaction_id') && ! $this->request->has('iN')) {
+            throw new InvalidRequestException;
+        }
+
+        if($this->request->has('transaction_id')) {
+            $id = intval($this->request->get('transaction_id'));
+        } else {
+            $id = intval($this->request->get('iN'));
+        }
+
+        return $id;
+    }
+
+    /**
      * Callback
      *
      * @return PortAbstract
@@ -114,13 +135,7 @@ class GatewayResolver {
      */
     public function verify()
     {
-        if( ! $this->request->has('transaction_id') && ! $this->request->has('iN'))
-            throw new InvalidRequestException;
-        if($this->request->has('transaction_id')) {
-            $id = intval($this->request->get('transaction_id'));
-        } else {
-            $id = intval($this->request->get('iN'));
-        }
+        $id = $this->getTransactionId();
 
         $transaction = $this->getTable()->whereId($id)->first();
 
