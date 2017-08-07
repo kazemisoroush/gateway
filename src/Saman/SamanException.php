@@ -6,7 +6,7 @@ use Larabookir\Gateway\Exceptions\BankException;
 
 class SamanException extends BankException {
 
-    public $errors = [
+    public static $errors = [
         // statuses...
         "OK"                                   => "پرداخت با موفقیت انجام شد.",
         'Canceled By User'                     => 'تراکنش توسط خریدار کنسل شد.',
@@ -54,6 +54,7 @@ class SamanException extends BankException {
             $code = intval($errorCode);
         }
 
-        parent::__construct($this->errors[$code], $code);
+        parent::__construct(@self::$errors[$code], $code);
     }
+
 }
