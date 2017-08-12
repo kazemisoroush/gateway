@@ -50,10 +50,6 @@ class SamanException extends BankException {
     {
         $code = $errorCode;
 
-        if(is_numeric($errorCode)) {
-            $code = intval($errorCode);
-        }
-
         parent::__construct(@self::$errors[$code], $code);
     }
 
