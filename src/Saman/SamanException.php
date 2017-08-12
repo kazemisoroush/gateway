@@ -46,11 +46,11 @@ class SamanException extends BankException {
         - 18                                   => "آدرس پذیرنده نامعتبر است."
     ];
 
-    public function __construct($errorCode)
+    public function __construct($errorRef)
     {
-        $code = $errorCode;
+        $this->errorRef = $errorRef;
 
-        parent::__construct(@self::$errors[$code], $code);
+        parent::__construct(@self::$errors[$this->errorRef].' ('.$this->errorRef.')', intval($this->errorRef));
     }
 
 }
