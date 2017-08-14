@@ -260,21 +260,24 @@ abstract class PortAbstract {
     protected function transactionFailed()
     {
         return $this->getTable()->whereId($this->transactionId)->update([
-            'status'     => Enum::TRANSACTION_FAILED,
-            'updated_at' => Carbon::now(),
+            'status'        => Enum::TRANSACTION_FAILED,
+            'tracking_code' => $this->trackingCode,
+            'card_number'   => $this->cardNumber,
+            'updated_at'    => Carbon::now(),
         ]);
     }
 
     /**
      * Update transaction refId
      *
-     * @return void
+     * @return boolean
      */
     protected function transactionSetRefId()
     {
         return $this->getTable()->whereId($this->transactionId)->update([
-            'ref_id'     => $this->refId,
-            'updated_at' => Carbon::now(),
+            'tracking_code' => $this->trackingCode,
+            'ref_id'        => $this->refId,
+            'updated_at'    => Carbon::now(),
         ]);
 
     }
