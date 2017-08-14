@@ -255,7 +255,6 @@ class Asanpardakht extends PortAbstract implements PortInterface {
      */
     protected function sendPayRequest()
     {
-
         // gather the parameters to make raw request...
         $serviceCode = ServiceEnum::PURCHASE;
         $username = $this->config->get('gateway.asan-pardakht.username');

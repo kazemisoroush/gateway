@@ -261,6 +261,7 @@ abstract class PortAbstract {
     {
         return $this->getTable()->whereId($this->transactionId)->update([
             'status'        => Enum::TRANSACTION_FAILED,
+            'ref_id'        => $this->refId,
             'tracking_code' => $this->trackingCode,
             'card_number'   => $this->cardNumber,
             'updated_at'    => Carbon::now(),
@@ -275,8 +276,9 @@ abstract class PortAbstract {
     protected function transactionSetRefId()
     {
         return $this->getTable()->whereId($this->transactionId)->update([
-            'tracking_code' => $this->trackingCode,
             'ref_id'        => $this->refId,
+            'tracking_code' => $this->trackingCode,
+            'card_number'   => $this->cardNumber,
             'updated_at'    => Carbon::now(),
         ]);
 
